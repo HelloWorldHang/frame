@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wang.doug.frame.dao.SitePvMapper">
+  <resultMap id="BaseResultMap" type="wang.doug.frame.model.SitePv">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="td_time" jdbcType="TIMESTAMP" property="tdTime" />
+    <result column="td_year" jdbcType="SMALLINT" property="tdYear" />
+    <result column="td_month" jdbcType="SMALLINT" property="tdMonth" />
+    <result column="td_day" jdbcType="SMALLINT" property="tdDay" />
+    <result column="td_hour" jdbcType="SMALLINT" property="tdHour" />
+    <result column="ip" jdbcType="VARCHAR" property="ip" />
+    <result column="res_id" jdbcType="INTEGER" property="resId" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ContainNameMap" type="wang.doug.frame.vo.SitePvVo">
+    <result column="rcs_name" jdbcType="VARCHAR" property="rcsName" />
+  </resultMap>
+  <resultMap id="SelectAllSystemMap" type="wang.doug.frame.vo.Stat">
+    <result column="pv" jdbcType="INTEGER" property="pv" />
+    <result column="sys_id" jdbcType="INTEGER" property="sysId" />
+    <result column="sys_name" jdbcType="VARCHAR" property="sysName" />
+  </resultMap>
+  <resultMap id="SelectAllYearMap" type="wang.doug.frame.vo.Stat" extends="SelectAllSystemMap">
+    <result column="td_year" jdbcType="SMALLINT" property="tdYear" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, td_time, td_year, td_month, td_day, td_hour, ip, res_id
+  </sql>
+  <select id="selectByExample" parameterType="wang.doug.frame.model.SitePvExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from site_pv
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!--create VIEW site_rcs as SELECT site_pv.*,CONCAT_WS("--",my_system.name,my_column.name,resource.name) as rcs_name
+   from site_pv LEFT JOIN resource ON site_pv.res_id=resource.id LEFT JOIN my_column on resource.col_id=my_column.id
+   LEFT JOIN my_system on my_column.sys_id=my_system.id;-->
+  <!--下面这个sql语句从上面这个视图中搜-->
+  <select id="selectByExampleContainRcsName" parameterType="wang.doug.frame.model.SitePvExample" resultMap="ContainNameMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    id,td_time,ip,rcs_name
+    from site_rcs
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+
+  <select id="selectAllSystem" resultMap="SelectAllSystemMap">
+    select
+    sys_name,sys_id,COUNT(*) as pv
+    from site_rcs
+    GROUP BY sys_name
+  </select>
+  <select id="selectAllYear" parameterType="java.lang.Integer" resultMap="SelectAllYearMap">
+    SELECT sys_id,sys_name,td_year,COUNT(*) as pv
+    FROM site_rcs
+    WHERE sys_id=#{sysId}
+    GROUP BY sys_name,td_year;
+  </select>
+  <select id="countBySystem" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+    SELECT COUNT(DISTINCT sys_name,sys_name) FROM site_rcs
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from site_pv
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from site_pv
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="wang.doug.frame.model.SitePvExample">
+    delete from site_pv
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="wang.doug.frame.model.SitePv">
+    insert into site_pv (id, td_time, td_year, 
+      td_month, td_day, td_hour, 
+      ip, res_id)
+    values (#{id,jdbcType=INTEGER}, #{tdTime,jdbcType=TIMESTAMP}, #{tdYear,jdbcType=SMALLINT}, 
+      #{tdMonth,jdbcType=SMALLINT}, #{tdDay,jdbcType=SMALLINT}, #{tdHour,jdbcType=SMALLINT}, 
+      #{ip,jdbcType=VARCHAR}, #{resId,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="wang.doug.frame.model.SitePv">
+    insert into site_pv
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="tdTime != null">
+        td_time,
+      </if>
+      <if test="tdYear != null">
+        td_year,
+      </if>
+      <if test="tdMonth != null">
+        td_month,
+      </if>
+      <if test="tdDay != null">
+        td_day,
+      </if>
+      <if test="tdHour != null">
+        td_hour,
+      </if>
+      <if test="ip != null">
+        ip,
+      </if>
+      <if test="resId != null">
+        res_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="tdTime != null">
+        #{tdTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="tdYear != null">
+        #{tdYear,jdbcType=SMALLINT},
+      </if>
+      <if test="tdMonth != null">
+        #{tdMonth,jdbcType=SMALLINT},
+      </if>
+      <if test="tdDay != null">
+        #{tdDay,jdbcType=SMALLINT},
+      </if>
+      <if test="tdHour != null">
+        #{tdHour,jdbcType=SMALLINT},
+      </if>
+      <if test="ip != null">
+        #{ip,jdbcType=VARCHAR},
+      </if>
+      <if test="resId != null">
+        #{resId,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="wang.doug.frame.model.SitePvExample" resultType="java.lang.Long">
+    select count(*) from site_pv
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update site_pv
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.tdTime != null">
+        td_time = #{record.tdTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.tdYear != null">
+        td_year = #{record.tdYear,jdbcType=SMALLINT},
+      </if>
+      <if test="record.tdMonth != null">
+        td_month = #{record.tdMonth,jdbcType=SMALLINT},
+      </if>
+      <if test="record.tdDay != null">
+        td_day = #{record.tdDay,jdbcType=SMALLINT},
+      </if>
+      <if test="record.tdHour != null">
+        td_hour = #{record.tdHour,jdbcType=SMALLINT},
+      </if>
+      <if test="record.ip != null">
+        ip = #{record.ip,jdbcType=VARCHAR},
+      </if>
+      <if test="record.resId != null">
+        res_id = #{record.resId,jdbcType=INTEGER},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update site_pv
+    set id = #{record.id,jdbcType=INTEGER},
+      td_time = #{record.tdTime,jdbcType=TIMESTAMP},
+      td_year = #{record.tdYear,jdbcType=SMALLINT},
+      td_month = #{record.tdMonth,jdbcType=SMALLINT},
+      td_day = #{record.tdDay,jdbcType=SMALLINT},
+      td_hour = #{record.tdHour,jdbcType=SMALLINT},
+      ip = #{record.ip,jdbcType=VARCHAR},
+      res_id = #{record.resId,jdbcType=INTEGER}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="wang.doug.frame.model.SitePv">
+    update site_pv
+    <set>
+      <if test="tdTime != null">
+        td_time = #{tdTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="tdYear != null">
+        td_year = #{tdYear,jdbcType=SMALLINT},
+      </if>
+      <if test="tdMonth != null">
+        td_month = #{tdMonth,jdbcType=SMALLINT},
+      </if>
+      <if test="tdDay != null">
+        td_day = #{tdDay,jdbcType=SMALLINT},
+      </if>
+      <if test="tdHour != null">
+        td_hour = #{tdHour,jdbcType=SMALLINT},
+      </if>
+      <if test="ip != null">
+        ip = #{ip,jdbcType=VARCHAR},
+      </if>
+      <if test="resId != null">
+        res_id = #{resId,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="wang.doug.frame.model.SitePv">
+    update site_pv
+    set td_time = #{tdTime,jdbcType=TIMESTAMP},
+      td_year = #{tdYear,jdbcType=SMALLINT},
+      td_month = #{tdMonth,jdbcType=SMALLINT},
+      td_day = #{tdDay,jdbcType=SMALLINT},
+      td_hour = #{tdHour,jdbcType=SMALLINT},
+      ip = #{ip,jdbcType=VARCHAR},
+      res_id = #{resId,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

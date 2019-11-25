@@ -1,0 +1,80 @@
+
+
+<script type="text/javascript">
+    /*<![CDATA[*/
+	var Index = function() {
+
+		return {
+
+			//初始化
+			init : function() {
+
+				//注册事件
+				this.initEvent();
+
+				//初始化表格
+				Sys.initTable(
+
+				this.getTableParam()
+
+				);
+
+			},
+
+			initEvent : function() {
+
+                $("#btnSearch").click(function () {
+                    Sys.refreshTable(Index.getTableParam());
+                });
+                $("#searchForm").submit(function () {
+
+                    Sys.refreshTable(Index.getTableParam());
+                    return false;
+
+                });
+
+			},
+
+
+			getTableParam : function() {
+
+				return {
+					tableId : "tabList",
+                    url : '/stat/SYS_ID/YEAR/MONTH/COL_ID/query_by_page.json'.replace(/SYS_ID/, $("#sysId").val()).replace(/YEAR/, $("#year").val()).replace(/MONTH/, $("#month").val()).replace(/COL_ID/, $("#colId").val()),
+
+                    // 通过表单ID获取查询信息
+                    queryParams: $("#searchForm").serializeObject(),
+
+					columns : [
+
+							{
+								"field" : "rcsName",
+								"title" : "资源",
+								"align" : "center"
+							},
+
+							{
+								"field" : "pv",
+								"title" : "pv",
+								"align" : "center"
+							}
+
+					]
+
+				}
+
+			}
+
+		};
+
+	}();
+
+	//入口
+	$(document).ready(function() {
+
+		Index.init();
+
+	});
+    /*]]>*/
+</script>
+

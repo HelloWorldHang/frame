@@ -1,0 +1,107 @@
+
+
+<script type="text/javascript">
+    /*<![CDATA[*/
+	var Index = function() {
+
+		return {
+
+			//初始化
+			init : function() {
+
+				//注册事件
+				this.initEvent();
+
+				//初始化表格
+				Sys.initTable(
+
+				this.getTableParam()
+
+				);
+
+			},
+
+			initEvent : function() {
+
+                $("#btnSearch").click(function () {
+                    Sys.refreshTable(Index.getTableParam());
+                });
+                $("#searchForm").submit(function () {
+
+                    Sys.refreshTable(Index.getTableParam());
+                    return false;
+
+                });
+
+			},
+
+			detail : function(sysId,tdYear,month) {
+
+				var url ='/stat/sysId/tdYear/month/colPv'.replace(/sysId/g, sysId).replace(/tdYear/g, tdYear).replace(/month/g, month);
+				window.location.href = url;
+
+			},
+
+			getTableParam : function() {
+
+				return {
+					tableId : "tabList",
+                    url : '/stat/SYS_ID/YEAR/query_by_page.json'.replace(/SYS_ID/, $("#sysId").val()).replace(/YEAR/, $("#year").val()),
+
+                    // 通过表单ID获取查询信息
+                    queryParams: $("#searchForm").serializeObject(),
+
+					columns : [
+
+
+							
+							{
+								"field" : "sysName",
+								"title" : "网站名",
+								"align" : "center"
+							},
+							{
+								"field" : "tdMonth",
+								"title" : "月份",
+								"align" : "center"
+							},
+							{
+								"field" : "pv",
+								"title" : "pv",
+								"align" : "center"
+							},
+
+
+							{
+								field : 'sysId',
+								title : '操作',
+								align : 'center',
+								formatter : function(value, row, index) {
+								    console.log(row.tdYear)
+                                    var btnEdit='<a href="javascript:;" onclick="Index.detail(\'sysId\',\'tdYear\',\'tdMonth\')"  class="btn btn-link" style="padding:0px 6px">详情</a>';
+
+                                    return [ btnEdit]
+											.join('').replace(/sysId/g, value).replace(/tdYear/, $("#year").val()).replace(/tdMonth/,row.tdMonth);
+
+								}
+							}
+
+					]
+
+				}
+
+			}
+
+		};
+
+	}();
+
+	//入口
+	$(document).ready(function() {
+
+		Index.init();
+
+	});
+    /*]]>*/
+</script>
+

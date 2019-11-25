@@ -1,0 +1,146 @@
+
+
+<script type="text/javascript">
+    /*<![CDATA[*/
+	var Index = function() {
+
+		return {
+
+			//初始化
+			init : function() {
+
+				//注册事件
+				this.initEvent();
+
+				//初始化表格
+				Sys.initTable(
+
+				this.getTableParam()
+
+				);
+
+			},
+
+			initEvent : function() {
+
+				$("#btnNew")
+						.click(
+								function() {
+									location.href = '/sitePv/new.html';
+								});
+
+
+
+                $("#btnSearch").click(function () {
+                    Sys.refreshTable(Index.getTableParam());
+                });
+                $("#searchForm").submit(function () {
+
+                    Sys.refreshTable(Index.getTableParam());
+                    return false;
+
+                });
+
+			},
+
+			edit : function(id) {
+
+				var url ='/sitePv/ID/edit.html'.replace(/ID/g, id);
+				window.location.href = url;
+
+			},
+
+		
+
+			remove : function(id) {
+
+                Sys.confirm({showMsg:"确定要删除吗？",callbackFunc:function(isConfirm){
+                        //确定删除
+                        if(isConfirm){
+
+
+                            $
+                                .ajax({
+                                    url :'/sitePv/delete.json',
+                                    data : "id=" + id,
+                                    type : 'post',
+                                    //async:false,
+                                    success : function(resp) {
+                                        if (!resp.success) {
+                                            Sys.alert(resp.resultMsg);
+                                            return;
+                                        }
+                                        Sys.alertSuccess({successMsg:"删除成功！",callbackFunc:function(){
+                                            //刷新表格
+                                            Sys.refreshTable(Index.getTableParam());
+                                            }});
+
+
+                                    },
+                                    error : function(resp) {
+                                        //alert("error！");
+                                    }
+                                });
+
+
+                        }
+
+                    }});
+			},
+            changeStatus:function(id){
+
+
+                alert("修改ID："+id+"  状态："+$("#status_"+id).val());
+
+                // $.ajax();
+
+
+            },
+
+			getTableParam : function() {
+
+				return {
+					tableId : "tabList",
+                    url : '/sitePv/query_by_page.json',
+                    queryParams: $("#searchForm").serializeObject(),
+					columns : [
+
+
+							
+							{
+								"field" : "tdTime",
+								"title" : "时间",
+								"align" : "center",
+                                "formatter" : Sys.timeFormatter
+							},
+							{
+								"field" : "ip",
+								"title" : "IP地址",
+								"align" : "center"
+							},
+                            //关联表查询级联名称
+                            {
+								"field" : "rcsName",
+								"title" : "资源",
+								"align" : "center"
+							}
+
+					]
+
+				}
+
+			}
+
+		};
+
+	}();
+
+	//入口
+	$(document).ready(function() {
+
+		Index.init();
+
+	});
+    /*]]>*/
+</script>
+

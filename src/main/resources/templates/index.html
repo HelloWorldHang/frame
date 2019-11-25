@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <th:block th:replace="common/meta"/>
+    <title>主页</title>
+    <th:block th:replace="common/link"/>
+</head>
+
+<body>
+<div class="wrapper">
+    <!-- top navbar-->
+    <th:block th:replace="common/header"/>
+
+    <!-- sidebar-->
+    <th:block th:replace="common/left"/>
+    <!-- offsidebar-->
+    <th:block th:replace="common/offsidebar"/>
+
+    <!-- Main section-->
+    <section>
+        <!-- Page content-->
+        <div class="content-wrapper">
+
+
+        </div>
+
+
+    </section>
+    <!-- Page footer-->
+    <th:block th:replace="common/footer"/>
+</div>
+<th:block th:replace="common/include"/>
+
+<!-- 系统消息弹出框 -->
+
+</body>
+
+</html>
